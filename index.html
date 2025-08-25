@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Countdown</title>
+    
+    <!-- Vue.js and GSAP libraries -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    
+    <!-- Google Fonts for a nice typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* General styling for the body */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Main app container */
+        #app {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        /* Countdown container styling */
+        .countdown-container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+
+        /* Styling for the countdown timer numbers */
+        #timer {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .time-box {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            width: 100px;
+        }
+
+        .time-box .number {
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .time-box .label {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        
+        /* Animation path styling */
+        .animation-path {
+            position: relative;
+            width: 100%;
+            height: 80px; /* Increased height for better visual */
+            margin-top: 20px;
+        }
+
+        .road {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+        }
+        
+        /* Character GIF styling */
+        #character {
+            position: absolute;
+            bottom: 25px; /* Positioned on the road */
+            height: 60px;
+            transform: translateX(-50%); /* Center the gif on its position */
+            transition: left 1s linear; /* Smooth movement */
+        }
+        
+        /* Destination flag styling */
+        .destination {
+            position: absolute;
+            right: 0;
+            bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .destination-flag {
+            font-size: 30px;
+        }
+        
+        .destination-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        /* Birthday view styling */
+        .birthday-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            width: 100%;
+        }
+
+        #birthday-message {
+            font-family: 'Pacifico', cursive;
+            font-size: 5rem;
+            color: #fff;
+            visibility: hidden; /* Initially hidden for GSAP */
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Confetti particle styling */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #f00;
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 20;
+        }
+        
+        /* Cake styling */
+        #cake {
+            position: relative;
+            width: 150px;
+            height: 120px;
+            background: #f2d1a8; /* Cake base color */
+            margin-top: 30px;
+            border-radius: 5px;
+            visibility: hidden; /* Initially hidden for GSAP */
+            z-index: 10;
+        }
+
+        /* Icing layer */
+        #cake::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: #fff;
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Middle cream layer */
+        #cake::after {
+            content: '';
+            position: absolute;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            height: 10px;
+            background: #e47a8b;
+        }
+
+        .candle {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 30px;
+            background: #f9c74f;
+            border-radius: 3px;
+        }
+
+        .flame {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 15px;
+            background: #f3722c;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: flicker 1s infinite alternate;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scaleY(1); }
+            50% { transform: translateX(-50%) scaleY(1.1); }
+            100% { transform: translateX(-50%) scaleY(1); }
+        }
+
+        /* Balloon styling */
+        .balloon {
+            position: absolute;
+            bottom: -150px; /* Start below the screen */
+            width: 60px;
+            height: 75px;
+            border-radius: 50%;
+            opacity: 0.8;
+            z-index: 1; /* Behind message and cake */
+        }
+
+        .balloon::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 1px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            #timer { flex-wrap: wrap; gap: 10px; }
+            .time-box { width: calc(50% - 10px); }
+            .time-box .number { font-size: 2rem; }
+            #birthday-message { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        <!-- Countdown View -->
+        <div v-if="!isBirthday" class="countdown-container">
+            <h1>The Journey Begins...</h1>
+            <p>Counting down to a very special day!</p>
+            <div id="timer">
+                <div class="time-box">
+                    <div class="number">{{ timeRemaining.days }}</div>
+                    <div class="label">Days</div>
+                </div>
+                <div class="time-box">
+                    <div class="number">{{ timeRemaining.hours }}</div>
+                    <div class="label">Hours</div>
+                </div>
+                <div class="time-box">
+                    <div class="number">{{ timeRemaining.minutes }}</div>
+                    <div class="label">Minutes</div>
+                </div>
+                <div class="time-box">
+                    <div class="number">{{ timeRemaining.seconds }}</div>
+                    <div class="label">Seconds</div>
+                </div>
+            </div>
+            
+            <!-- Animation Path -->
+            <div class="animation-path">
+                <div class="road"></div>
+                <img id="character" src="https://media.tenor.com/eLp_4QRc0iAAAAAi/run-running.gif" alt="walking character" :style="{ left: progress + '%' }">
+                <div class="destination">
+                    <div class="destination-flag">🎂</div>
+                    <div class="destination-label">Sept 1st</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Birthday View -->
+        <div v-if="isBirthday" class="birthday-container">
+            <h1 id="birthday-message">Happy Birthday!</h1>
+            <div id="cake">
+                <div class="candle">
+                    <div class="flame"></div>
+                </div>
+            </div>
+            <!-- Balloons and Confetti will be generated here -->
+        </div>
+        
+    </div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    // Set the target birthday date
+                    targetDate: new Date(`${new Date().getFullYear()}-09-01T00:00:00`),
+                    // Initial time remaining object
+                    timeRemaining: {
+                        days: 0, hours: 0, minutes: 0, seconds: 0
+                    },
+                    isBirthday: false,
+                    progress: 0,
+                    // Start date for progress calculation (can be adjusted)
+                    startDate: new Date(`${new Date().getFullYear()}-08-01T00:00:00`),
+                    interval: null
+                };
+            },
+            methods: {
+                /**
+                 * Calculates the time remaining and updates the state.
+                 * This function is called every second.
+                 */
+                updateCountdown() {
+                    const now = new Date();
+                    // FOR TESTING: Uncomment the line below to simulate the birthday
+                    // const difference = -1;
+                    const difference = this.targetDate.getTime() - now.getTime();
+
+                    if (difference > 0) {
+                        // Calculate days, hours, minutes, and seconds
+                        this.timeRemaining.days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                        this.timeRemaining.hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        this.timeRemaining.minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                        this.timeRemaining.seconds = Math.floor((difference % (1000 * 60)) / 1000);
+                        
+                        // Calculate the progress for the walking animation
+                        this.updateProgress();
+
+                    } else {
+                        // It's the birthday!
+                        this.isBirthday = true;
+                        clearInterval(this.interval);
+                        // Using nextTick to ensure the birthday message is in the DOM before animating
+                        this.$nextTick(() => {
+                            this.triggerBirthdayAnimation();
+                        });
+                    }
+                },
+                
+                /**
+                 * Calculates the progress of the character on the path.
+                 */
+                updateProgress() {
+                    const now = new Date();
+                    const totalDuration = this.targetDate.getTime() - this.startDate.getTime();
+                    const elapsed = now.getTime() - this.startDate.getTime();
+                    
+                    // Calculate progress as a percentage
+                    let progressPercentage = (elapsed / totalDuration) * 100;
+                    
+                    // Ensure progress stays between 0 and 95% before the final day for better visuals
+                    this.progress = Math.min(Math.max(0, progressPercentage), 95);
+                },
+
+                /**
+                 * Triggers the GSAP animations for the birthday message and confetti.
+                 */
+                triggerBirthdayAnimation() {
+                    const message = document.getElementById('birthday-message');
+                    const cake = document.getElementById('cake');
+
+                    // Use a GSAP timeline for better sequencing
+                    const tl = gsap.timeline();
+                    
+                    // Animate the "Happy Birthday" text
+                    tl.fromTo(message, 
+                        { scale: 0, opacity: 0, visibility: 'visible' }, 
+                        { scale: 1, opacity: 1, duration: 1.5, ease: "elastic.out(1, 0.5)" }
+                    );
+
+                    // Animate the cake
+                    tl.fromTo(cake,
+                        { y: 100, opacity: 0, visibility: 'visible' },
+                        { y: 0, opacity: 1, duration: 1, ease: 'back.out(1.7)' },
+                        "-=1.2" // Start this animation before the previous one ends
+                    );
+
+                    // Create and animate confetti
+                    this.createConfetti();
+                    // Create and animate balloons
+                    this.createBalloons();
+                },
+                
+                /**
+                 * Generates and animates confetti particles.
+                 */
+                createConfetti() {
+                    const confettiCount = 100;
+                    const colors = ['#f94144', '#f3722c', '#f8961e', '#f9c74f', '#90be6d', '#43aa8b', '#577590'];
+                    const container = document.querySelector('.birthday-container');
+
+                    for (let i = 0; i < confettiCount; i++) {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        container.appendChild(confetti);
+
+                        gsap.set(confetti, {
+                            x: Math.random() * window.innerWidth,
+                            y: -20,
+                            background: colors[Math.floor(Math.random() * colors.length)]
+                        });
+                        
+                        // Animate each confetti particle
+                        gsap.to(confetti, {
+                            y: window.innerHeight + 20,
+                            x: '+= ' + (Math.random() - 0.5) * 400,
+                            rotation: Math.random() * 360,
+                            duration: Math.random() * 3 + 3,
+                            opacity: 1,
+                            ease: "power1.out",
+                            delay: Math.random() * 2,
+                            onComplete: () => {
+                                confetti.remove(); // Clean up confetti from DOM
+                            }
+                        });
+                    }
+                },
+                
+                /**
+                 * Generates and animates floating balloons.
+                 */
+                createBalloons() {
+                    const balloonCount = 8;
+                    const colors = ['#f94144', '#f8961e', '#90be6d', '#43aa8b', '#577590', '#f3722c', '#f9c74f', '#6c5ce7'];
+                    const container = document.querySelector('.birthday-container');
+
+                    for (let i = 0; i < balloonCount; i++) {
+                        const balloon = document.createElement('div');
+                        balloon.className = 'balloon';
+                        container.appendChild(balloon);
+
+                        const balloonSize = Math.random() * 30 + 50; // Random size
+
+                        gsap.set(balloon, {
+                            x: Math.random() * (window.innerWidth * 0.8) + (window.innerWidth * 0.1),
+                            width: balloonSize,
+                            height: balloonSize * 1.25,
+                            background: colors[i % colors.length]
+                        });
+                        
+                        // Animate each balloon to float up
+                        gsap.to(balloon, {
+                            y: -(window.innerHeight + 150),
+                            duration: Math.random() * 6 + 6,
+                            ease: "power1.in",
+                            delay: Math.random() * 3,
+                            repeat: -1,
+                            onRepeat: function() {
+                                // Reset position on repeat for a continuous stream of balloons
+                                gsap.set(this.targets()[0], { 
+                                    y: 50,
+                                    x: Math.random() * (window.innerWidth * 0.8) + (window.innerWidth * 0.1)
+                                });
+                            }
+                        });
+                        
+                        // Add a gentle side-to-side sway
+                        gsap.to(balloon, {
+                            x: '+= ' + (Math.random() - 0.5) * 100,
+                            duration: Math.random() * 4 + 3,
+                            ease: "sine.inOut",
+                            repeat: -1,
+                            yoyo: true
+                        });
+                    }
+                }
+            },
+            /**
+             * Mounted lifecycle hook.
+             * This is called when the Vue app is ready.
+             */
+            mounted() {
+                // Initial call to set the time immediately
+                this.updateCountdown();
+                // Set up an interval to update the countdown every second
+                this.interval = setInterval(this.updateCountdown, 1000);
+            },
+            /**
+             * beforeUnmount lifecycle hook.
+             * Clean up the interval when the component is destroyed.
+             */
+            beforeUnmount() {
+                clearInterval(this.interval);
+            }
+        }).mount('#app');
+    </script>
+
+</body>
+</html>
