@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Special Countdown</title>
+    <title>Lynn's Special Countdown</title>
     
     <!-- Vue.js and GSAP libraries -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -13,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="cake.ico">
 
     <style>
         /* General styling for the body */
@@ -133,13 +134,17 @@
 
         /* Birthday view styling */
         .birthday-container {
+            /* FIX: Make this container take up the full screen so confetti and balloons can spread out */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100%;
-            position: relative;
-            width: 100%;
+            overflow: hidden; /* Hide anything that goes beyond the viewport */
         }
 
         #birthday-message {
@@ -263,7 +268,7 @@
     <div id="app">
         <!-- Countdown View -->
         <div v-if="!isBirthday" class="countdown-container">
-            <h1>The Journey Begins...</h1>
+            <h1>The Countdown Begins...</h1>
             <p>Counting down to a very special day!</p>
             <div id="timer">
                 <div class="time-box">
@@ -297,7 +302,7 @@
 
         <!-- Birthday View -->
         <div v-if="isBirthday" class="birthday-container">
-            <h1 id="birthday-message">Happy Birthday!</h1>
+            <h1 id="birthday-message">Happy Birthday Lynn!</h1>
             <div id="cake">
                 <div class="candle">
                     <div class="flame"></div>
@@ -417,6 +422,7 @@
                         container.appendChild(confetti);
 
                         gsap.set(confetti, {
+                            // Use window.innerWidth for a random start position across the full screen
                             x: Math.random() * window.innerWidth,
                             y: -20,
                             background: colors[Math.floor(Math.random() * colors.length)]
@@ -425,7 +431,8 @@
                         // Animate each confetti particle
                         gsap.to(confetti, {
                             y: window.innerHeight + 20,
-                            x: '+= ' + (Math.random() - 0.5) * 400,
+                            // Make the horizontal sway more dynamic
+                            x: '+=' + (Math.random() - 0.5) * window.innerWidth * 0.5,
                             rotation: Math.random() * 360,
                             duration: Math.random() * 3 + 3,
                             opacity: 1,
@@ -454,7 +461,8 @@
                         const balloonSize = Math.random() * 30 + 50; // Random size
 
                         gsap.set(balloon, {
-                            x: Math.random() * (window.innerWidth * 0.8) + (window.innerWidth * 0.1),
+                            // Use window.innerWidth for a random start position across the full screen
+                            x: Math.random() * window.innerWidth,
                             width: balloonSize,
                             height: balloonSize * 1.25,
                             background: colors[i % colors.length]
@@ -471,7 +479,7 @@
                                 // Reset position on repeat for a continuous stream of balloons
                                 gsap.set(this.targets()[0], { 
                                     y: 50,
-                                    x: Math.random() * (window.innerWidth * 0.8) + (window.innerWidth * 0.1)
+                                    x: Math.random() * window.innerWidth
                                 });
                             }
                         });
